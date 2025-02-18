@@ -3,8 +3,6 @@ import { Link } from 'react-router-dom';
 import { useNavigate } from "react-router-dom";
 
 function Signup() {
-  const [email,setEmail]=useState("");
- 
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -14,7 +12,13 @@ function Signup() {
     role: ''
   });
 
+  const [errors, setErrors] = useState({
+    password: '',
+    confirmPassword: ''
+  });
+
   const [captchaVerified, setCaptchaVerified] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Load the reCAPTCHA script
@@ -24,32 +28,74 @@ function Signup() {
     recaptchaScript.defer = true;
     document.head.appendChild(recaptchaScript);
 
-    // Load Google Identity Services script
+    // Load Google Identity Services script with proper callback
     const googleScript = document.createElement('script');
     googleScript.src = 'https://accounts.google.com/gsi/client';
     googleScript.async = true;
     googleScript.defer = true;
+    googleScript.onload = initializeGoogleSignIn;
     document.head.appendChild(googleScript);
 
     return () => {
-      document.head.removeChild(recaptchaScript);
-      document.head.removeChild(googleScript);
+      if (document.head.contains(recaptchaScript)) {
+        document.head.removeChild(recaptchaScript);
+      }
+      if (document.head.contains(googleScript)) {
+        document.head.removeChild(googleScript);
+      }
     };
   }, []);
 
-  useEffect(() => {
-    if (window.google) {
+  // Create a function to initialize Google Sign In
+  const initializeGoogleSignIn = () => {
+    if (window.google && window.google.accounts) {
       window.google.accounts.id.initialize({
-        client_id: "349488632873-mk2mu8pkrhba44iqlne1m882pva74see.apps.googleusercontent.com", // Replace with your Google Client ID
+        client_id: "349488632873-mk2mu8pkrhba44iqlne1m882pva74see.apps.googleusercontent.com",
         callback: handleGoogleSignIn
       });
+
+      // Render the standard Google button
+      window.google.accounts.id.renderButton(
+        document.getElementById('g_id_signin'),
+        { 
+          theme: 'outline', 
+          size: 'large',
+          text: 'continue_with',
+          width: '100%',
+          type: 'standard'
+        }
+      );
+    } else {
+      // If Google isn't available yet, try again in a moment
+      setTimeout(initializeGoogleSignIn, 100);
     }
-  }, []);
+  };
 
   const handleGoogleSignIn = (response) => {
-    // Handle the Google Sign-In response
     console.log('Google Sign-In successful:', response);
-    // Add your Google authentication logic here
+    
+    // Extract the credential token
+    const credential = response.credential;
+    
+    // Send the token to your backend
+    fetch("http://localhost:5000/api/auth/google", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ credential })
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log("Authentication successful:", data);
+      // Store user info/token in local storage or context
+      // Redirect to the dashboard or home page
+      navigate("/dashboard");
+    })
+    .catch(error => {
+      console.error("Authentication error:", error);
+      // Display error message to user
+    });
   };
 
   const handleChange = (e) => {
@@ -58,14 +104,52 @@ function Signup() {
       ...prevState,
       [name]: value
     }));
+
+    // Validate passwords on change
+    if (name === 'password') {
+      validatePassword(value, formData.confirmPassword);
+    } else if (name === 'confirmPassword') {
+      validatePassword(formData.password, value);
+    }
+  };
+
+  const validatePassword = (password, confirmPassword) => {
+    let newErrors = { ...errors };
+    
+    // Check password length
+    if (password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters long';
+    } else {
+      newErrors.password = '';
+    }
+    
+    // Check if passwords match
+    if (password && confirmPassword && password !== confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    } else {
+      newErrors.confirmPassword = '';
+    }
+    
+    setErrors(newErrors);
   };
 
   const handleCaptchaVerify = () => {
     setCaptchaVerified(true);
   };
-  const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Final validation before submission
+    validatePassword(formData.password, formData.confirmPassword);
+    
+    // Check if there are any validation errors
+    if (errors.password || errors.confirmPassword || formData.password.length < 8 || formData.password !== formData.confirmPassword) {
+      // Focus on the password field if there's an error
+      document.getElementsByName('password')[0].focus();
+      return;
+    }
+    
     if (!captchaVerified) {
       alert('Please verify that you are not a robot');
       return;
@@ -73,55 +157,48 @@ function Signup() {
 
     navigate("/verify-otp", { state: { email: formData.email } });
     
-    const {firstName,lastName,email,password,role}=formData;
+    const {firstName, lastName, email, password, role} = formData;
 
-    console.log(email)
-
-
+    console.log(email);
 
     //sending email
     try {
-      
-      const response = await fetch("http://localhost:5000/api/send-otp",{
-        method:"POST",
-        headers:{
-          "content-type":'application/json'
+      const response = await fetch("http://localhost:5000/api/send-otp", {
+        method: "POST",
+        headers: {
+          "content-type": 'application/json'
         },
-        body:JSON.stringify({
-          email:email,
+        body: JSON.stringify({
+          email: email,
         })
-      })
+      });
       const data = await response.json();
-      console.log(data.message)
-
+      console.log(data.message);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
 
     try {
-      const response = await fetch("http://localhost:5000/signUp",{
-        method:"POST",
-        headers:{
-          "content-type":'application/json'
+      const response = await fetch("http://localhost:5000/signUp", {
+        method: "POST",
+        headers: {
+          "content-type": 'application/json'
         },
-        body:JSON.stringify({
+        body: JSON.stringify({
           fname: firstName,
-          lname:lastName,
+          lname: lastName,
           email: email,
           password: password,
-          role:role
+          role: role
         })
-      })
+      });
       const data = await response.json();
-      console.log(data.message)
-      //window.location="/"
-
+      console.log(data.message);
     } catch (error) {
-          console.log(error.message) 
+      console.log(error.message);
     }
 
     console.log('Form submitted:', formData);
-    // Add your form submission logic here
   };
 
   // Add this to your window object to handle reCAPTCHA callback
@@ -178,6 +255,7 @@ function Signup() {
                   value={formData.firstName}
                   onChange={handleChange}
                   className="w-full bg-gray-900 border border-gray-800 text-white px-4 py-2 font-mono text-sm focus:outline-none rounded-lg"
+                  required
                 />
               </div>
               <div>
@@ -189,6 +267,7 @@ function Signup() {
                   value={formData.lastName}
                   onChange={handleChange}
                   className="w-full bg-gray-900 border border-gray-800 text-white px-4 py-2 font-mono text-sm focus:outline-none rounded-lg"
+                  required
                 />
               </div>
             </div>
@@ -202,6 +281,7 @@ function Signup() {
                 value={formData.email}
                 onChange={handleChange}
                 className="w-full bg-gray-900 border border-gray-800 text-white px-4 py-2 font-mono text-sm focus:outline-none rounded-lg"
+                required
               />
             </div>
 
@@ -214,9 +294,14 @@ function Signup() {
                   placeholder="Password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full bg-gray-900 border border-gray-800 text-white px-4 py-2 font-mono text-sm focus:outline-none rounded-lg"
+                  className={`w-full bg-gray-900 border ${errors.password ? 'border-red-500' : 'border-gray-800'} text-white px-4 py-2 font-mono text-sm focus:outline-none rounded-lg`}
+                  required
                 />
-                <p className="text-gray-600 text-xs font-mono">Must be at least 8 characters</p>
+                {errors.password ? (
+                  <p className="text-red-500 text-xs font-mono mt-1">{errors.password}</p>
+                ) : (
+                  <p className="text-gray-600 text-xs font-mono mt-1">Must be at least 8 characters</p>
+                )}
               </div>
             </div>
 
@@ -228,8 +313,12 @@ function Signup() {
                 placeholder="Confirm Password"
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className="w-full bg-gray-900 border border-gray-800 text-white px-4 py-2 font-mono text-sm focus:outline-none rounded-lg"
+                className={`w-full bg-gray-900 border ${errors.confirmPassword ? 'border-red-500' : 'border-gray-800'} text-white px-4 py-2 font-mono text-sm focus:outline-none rounded-lg`}
+                required
               />
+              {errors.confirmPassword && (
+                <p className="text-red-500 text-xs font-mono mt-1">{errors.confirmPassword}</p>
+              )}
             </div>
 
             <div>
@@ -239,6 +328,7 @@ function Signup() {
                 value={formData.role}
                 onChange={handleChange}
                 className="w-full bg-gray-900 border border-gray-800 text-white px-4 py-2 font-mono text-sm focus:outline-none appearance-none rounded-lg"
+                required
               >
                 <option value="">Select Role</option>
                 <option value="manager">Manager</option>
@@ -261,43 +351,15 @@ function Signup() {
               <button
                 type="submit"
                 className="w-full bg-white text-black py-2 font-mono text-sm hover:bg-gray-100 transition-colors rounded-3xl disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={!captchaVerified}
+                disabled={!captchaVerified || !!errors.password || !!errors.confirmPassword}
               >
                 Sign Up
               </button>
 
-              <div
-                id="g_id_onload"
-                data-client_id="YOUR_GOOGLE_CLIENT_ID"
-                data-callback="handleGoogleSignIn"
-              ></div>
-              <button
-                type="button"
-                onClick={() => {
-                  window.google?.accounts.id.prompt();
-                }}
-                className="w-full flex items-center justify-center gap-2 bg-gray-900 border border-gray-800 text-white py-2 font-mono text-sm hover:bg-gray-800 transition-colors rounded-3xl"
-              >
-                <svg className="w-5 h-5" viewBox="0 0 24 24">
-                  <path
-                    fill="currentColor"
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                  />
-                  <path
-                    fill="currentColor"
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                  />
-                  <path
-                    fill="currentColor"
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                  />
-                  <path
-                    fill="currentColor"
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                  />
-                </svg>
-                Continue with Google
-              </button>
+              {/* Replace the custom Google button with the standard one */}
+              <div className="flex justify-center my-4">
+                <div id="g_id_signin" className="w-full"></div>
+              </div>
             </div>
 
             <p className="text-gray-500 text-center font-mono text-sm">
