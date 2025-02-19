@@ -28,7 +28,6 @@ function Signup() {
     recaptchaScript.defer = true;
     document.head.appendChild(recaptchaScript);
 
-    // Load Google Identity Services script with proper callback
     const googleScript = document.createElement('script');
     googleScript.src = 'https://accounts.google.com/gsi/client';
     googleScript.async = true;
@@ -105,7 +104,7 @@ function Signup() {
       [name]: value
     }));
 
-    // Validate passwords on change
+    //val pass
     if (name === 'password') {
       validatePassword(value, formData.confirmPassword);
     } else if (name === 'confirmPassword') {
@@ -116,14 +115,14 @@ function Signup() {
   const validatePassword = (password, confirmPassword) => {
     let newErrors = { ...errors };
     
-    // Check password length
+    //pass len
     if (password.length < 8) {
       newErrors.password = 'Password must be at least 8 characters long';
     } else {
       newErrors.password = '';
     }
     
-    // Check if passwords match
+    //pass match
     if (password && confirmPassword && password !== confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     } else {
@@ -140,12 +139,12 @@ function Signup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Final validation before submission
+    //Final validation
     validatePassword(formData.password, formData.confirmPassword);
     
-    // Check if there are any validation errors
+    //validation errors
     if (errors.password || errors.confirmPassword || formData.password.length < 8 || formData.password !== formData.confirmPassword) {
-      // Focus on the password field if there's an error
+     
       document.getElementsByName('password')[0].focus();
       return;
     }
@@ -201,7 +200,7 @@ function Signup() {
     console.log('Form submitted:', formData);
   };
 
-  // Add this to your window object to handle reCAPTCHA callback
+  //reCAPTCHA callback
   window.onRecaptchaSuccess = () => {
     handleCaptchaVerify();
   };
@@ -244,7 +243,7 @@ function Signup() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Previous form fields remain unchanged */}
+            
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm text-white font-mono mb-2" htmlFor="firstName">First Name</label>
@@ -356,7 +355,7 @@ function Signup() {
                 Sign Up
               </button>
 
-              {/* Replace the custom Google button with the standard one */}
+              {/*G-botton to be edited*/}
               <div className="flex justify-center my-4">
                 <div id="g_id_signin" className="w-full"></div>
               </div>
