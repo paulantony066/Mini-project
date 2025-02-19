@@ -5,11 +5,12 @@ function VerifyOtp() {
   const [otp, setOtp] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
-  const email = location.state?.email || "";
+  //const email = location.state?.email || "";
+  const { email, firstName, lastName, password, role } = location.state || {};
 
   const handleVerifyOtp = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/verify-otp", {
+      const response = await fetch("http://localhost:5000/api/otp/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, otp }),
@@ -17,6 +18,29 @@ function VerifyOtp() {
   
       const data = await response.json();
       if (data.success) {
+
+        try {
+          const response = await fetch("http://localhost:5000/api/auth/signUp", {
+            method: "POST",
+            headers: {
+              "content-type": 'application/json'
+            },
+            body: JSON.stringify({
+              fname: firstName,
+              lname: lastName,
+              email: email,
+              password: password,
+              role: role
+            })
+          });
+          const data = await response.json();
+          console.log(data.message);
+        } catch (error) {
+          console.log(error.message);
+        }
+        
+        console.log('Form submitted:', email,firstName);
+
         alert("OTP Verified! You can now log in.");
         navigate("/login"); // Redirect to the login page
       } else {
@@ -87,5 +111,8 @@ function VerifyOtp() {
 
 
 }
+
+
+
 
 export default VerifyOtp;

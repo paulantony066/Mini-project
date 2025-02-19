@@ -21,7 +21,7 @@ function Login() {
     //destructure
     const {email,password,remember}=formData;
     try {
-      const response = await fetch("http://localhost:5000/signIn",{
+      const response = await fetch("http://localhost:5000/api/auth/signIn",{
         method:"POST",
         headers:{
           "content-type":'application/json'

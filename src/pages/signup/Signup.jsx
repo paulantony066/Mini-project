@@ -154,7 +154,7 @@ function Signup() {
       return;
     }
 
-    navigate("/verify-otp", { state: { email: formData.email } });
+    
     
     const {firstName, lastName, email, password, role} = formData;
 
@@ -162,7 +162,7 @@ function Signup() {
 
     //sending email
     try {
-      const response = await fetch("http://localhost:5000/api/send-otp", {
+      const response = await fetch("http://localhost:5000/api/otp/send-otp", {
         method: "POST",
         headers: {
           "content-type": 'application/json'
@@ -176,28 +176,14 @@ function Signup() {
     } catch (error) {
       console.log(error);
     }
+    navigate("/verify-otp", { state: {
+      email: formData.email,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      password: formData.password,
+      role: formData.role, } });
 
-    try {
-      const response = await fetch("http://localhost:5000/signUp", {
-        method: "POST",
-        headers: {
-          "content-type": 'application/json'
-        },
-        body: JSON.stringify({
-          fname: firstName,
-          lname: lastName,
-          email: email,
-          password: password,
-          role: role
-        })
-      });
-      const data = await response.json();
-      console.log(data.message);
-    } catch (error) {
-      console.log(error.message);
-    }
-
-    console.log('Form submitted:', formData);
+  
   };
 
   //reCAPTCHA callback
