@@ -11,7 +11,7 @@ export default function Employeedetail(){
                             class="text-xl font-semibold text-white-900 mb-2 capitalize  transition-all duration-500 ">
                             Antonio Roberto </h4>
                         <p class="text-white  block transition-all duration-500 ">Team Leader</p>
-                        <p class="text-white  block transition-all duration-500 ">Average Rating : 4.8</p>
+                        <p class="text-white  block transition-all duration-500 ">Average Rating : 4.2</p>
         </div>
     )
 }
