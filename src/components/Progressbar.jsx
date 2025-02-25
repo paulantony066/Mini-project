@@ -2,7 +2,7 @@ import React from "react";
 
 export default function Progressbar(){
     return(
-        <div class="ml-8 mr-80 space-y-2">
+        <div class="mr-80 space-y-2">
                     <div class="flex justify-between mb-1">
                      <span class="text-base font-medium text-white-700 dark:text-white">Sprint Progress</span>
                      <span class="text-sm font-medium text-white-700 dark:text-white">45%</span>
