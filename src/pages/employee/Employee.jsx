@@ -1,15 +1,15 @@
-import React from "react";
+import React from 'react'
 
-import Sidebar from "../../components/Sidebar";
-import Employeedetail from "../../components/Employeedetail";
-import Progressbar from "../../components/Progressbar";
-import Button from "../../components/Button";
+import Employeedetail from '../../components/Employeedetail';
+import Progressbar from '../../components/Progressbar';
+import Barchart from '../../components/Barchart';
+import Sidebar from '../../components/Sidebar';
+import Table from '../../components/Table';
+import Button from '../../components/Button';
 import Performance from "../../components/Performance";
-import Table from "../../components/Table";
-import Barchart from "../../components/Barchart";
 
 
-export default function Manager() {
+export default function Employee() {
     const sidebarTop = [
         {
           name: "Tasks",
@@ -43,8 +43,8 @@ export default function Manager() {
     const employeeDetail={
         name:"Antonio Roberto",
         photo:"https://pagedone.io/asset/uploads/1696238374.png",
-        role:"Manager",
-        // rating:"Average Rating : 4.2"
+        role:"Team Leader",
+        rating:"Average Rating : 4.2"
     }
 
     const progressBar={
@@ -66,35 +66,36 @@ export default function Manager() {
             text:"Pending tasks"
         },
     ]
-    const projects = [
-      { id: 1, name: "Design System", progress: "75%", deadline: "2023-01-01", pendingTasks: 2 },
-      { id: 2, name: "Dashboard UI", progress: "50%", deadline: "2023-02-15", pendingTasks: 5 },
-      { id: 3, name: "Backend API", progress: "90%", deadline: "2023-03-10", pendingTasks: 1 },
-      { id: 4, name: "Testing & QA", progress: "60%", deadline: "2023-04-05", pendingTasks: 4 }
-    ]
 
+     const but1="Create New project"
 
     return (
-        <div class="w-full h-screen bg-black text-white flex overflow-y-auto m-0 p-0">
+        <div class="w-screen h-screen bg-black text-white flex overflow-y-auto ">
          <div>
             <Sidebar sidebarTop={sidebarTop} sidebarBottom={sidebarBottom}/>
          </div>
             
-            <div class="w-screen overflow-y-auto pt-8">
+            <div class="w-screen overflow-y-auto ">
             <div>
                 <Employeedetail person={employeeDetail}/>
             </div>
             <div>
-              <h1 className="text-3xl font-bold pt-8">Overview</h1>
-              <h2 className="text-2xl  pt-2 pb-4">Projects</h2>
-              <Table projects={projects} />
-                <br />
-                <Button buttonName={"Create New Project"}/>
+                <Progressbar progressBar={progressBar}/>
             </div>
+            <br />
+            <div class="flex justify-evenly">
+
+            {performancess.map((item, index) => (
+                <Performance digit={item.digit} text={item.text} key={index}/>
+            ))}
+
+            </div>
+            <br />
+                <Barchart/>
+            <br />
 
             </div>
     </div>
     )
 }
 
-  

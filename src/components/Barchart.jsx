@@ -43,7 +43,7 @@ const salesData = [
 
 const Barchart = () => {
     return (
-        <div className="border-2 border-gray-800 rounded-lg p-3 pb-8  h-64 w-full">
+        <div className="border-2 border-gray-800 rounded-lg p-3 pb-8  h-64 w-[90%]">
         <h1>Task completion rate</h1>
         <h1>Jun 21 - Jun 25</h1>
         
