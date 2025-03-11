@@ -55,7 +55,7 @@ const Barchart = () => {
           margin={{
             left: 10,
             top: 20,
-            right: 800,
+            right: 500,
             bottom: 20,
           }}
         >

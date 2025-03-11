@@ -7,9 +7,12 @@ import Button from "../../components/Button";
 import Performance from "../../components/Performance";
 import Table from "../../components/Table";
 import Barchart from "../../components/Barchart";
+import { useLocation } from "react-router-dom";
 
 
 export default function Manager() {
+    const location = useLocation();
+    const { email } = location.state || {};
     const sidebarTop = [
         {
           name: "Tasks",
@@ -75,15 +78,18 @@ export default function Manager() {
 
 
     return (
-        <div class="w-full h-screen bg-black text-white flex overflow-y-auto m-0 p-0">
+        <div className="w-full h-screen bg-black text-white flex overflow-y-auto m-0 p-0">
          <div>
             <Sidebar sidebarTop={sidebarTop} sidebarBottom={sidebarBottom}/>
          </div>
+          <div>
             
-            <div class="w-screen overflow-y-auto pt-8">
+            </div>  
+            <div className="w-screen overflow-y-auto pt-8">
             <div>
                 <Employeedetail person={employeeDetail}/>
             </div>
+            <h1>{email}</h1>
             <div>
               <h1 className="text-3xl font-bold pt-8">Overview</h1>
               <h2 className="text-2xl  pt-2 pb-4">Projects</h2>

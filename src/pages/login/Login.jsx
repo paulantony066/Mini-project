@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -7,6 +8,9 @@ function Login() {
     password: '',
     remember: false
   });
+
+  const trole="Manager";
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -20,27 +24,37 @@ function Login() {
     e.preventDefault();
     //destructure
     const {email,password,remember}=formData;
-    try {
-      const response = await fetch("http://localhost:5000/api/auth/signIn",{
-        method:"POST",
-        headers:{
-          "content-type":'application/json'
-        },
-        body:JSON.stringify({
-          email: email,
-          password: password,
-        })
-      })
-      
-      //window.location="/"
-      const data = await response.json();
-      console.log(data.message)
-
-    } catch (error) {
-          console.log(error.message) 
-    }
-    console.log('Form submitted:', formData);
     
+    
+    // try {
+    //   const response = await fetch("http://localhost:5000/api/auth/signIn",{
+    //     method:"POST",
+    //     headers:{
+    //       "content-type":'application/json'
+    //     },
+    //     body:JSON.stringify({
+    //       email: email,
+    //       password: password,
+    //     })
+    //   })
+      
+    //   //window.location="/"
+    //   const data = await response.json();
+    //   console.log(data.message)
+    // } catch (error) {
+    //       console.log(error.message) 
+    // }
+    console.log('Form submitted:', formData);
+    if(trole=="Manager"){
+      navigate("/manager", { state: {
+        email: formData.email
+         } });
+    }
+    if(trole=="Employee"){
+      navigate("/employee", { state: {
+        email: formData.email
+         } });
+    }
   };
 
   return (
